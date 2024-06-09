@@ -16,41 +16,46 @@ namespace baltaio_DapperEndityframework
 
             SqlConnection sqlConnection = new SqlConnection(_connection);
             sqlConnection.Open();
-            ReadUsers(sqlConnection);
-            ReadRole(sqlConnection);
+            ReadUsersWithRole(sqlConnection);
+            //ReadRole(sqlConnection);
+            //ReadTags(sqlConnection);
             sqlConnection.Close();
 
         }
 
         #region User
-        public static void ReadUsers(SqlConnection sqlConnection)
+        public static void ReadUsersWithRole(SqlConnection sqlConnection)
         {
-            var users = new BaseRepository<User>(sqlConnection).GetAll();
+            var users = new UserRepository(sqlConnection).getUsersWithRoles();
 
             foreach (var user in users) {
                 Console.WriteLine(user.Name);
+                foreach (var role in user.roles)
+                { 
+                    Console.WriteLine($" Role: {role.Name}");
+                }
             }
   
         }
         public static void ReadUser(int id,SqlConnection sqlConnection)
         {
-            var user = new UserRepository(sqlConnection).Get(id);
+            var user = new BaseRepository<User>(sqlConnection).Get(id);
             Console.WriteLine(user.Name);
 
         }
         public static void CreateUser(User usuario, SqlConnection sqlConnection)
         {
-            var id = new UserRepository(sqlConnection).Insert(usuario);
-            var user = new UserRepository(sqlConnection).Get(id);
+            var id = new BaseRepository<User>(sqlConnection).Insert(usuario);
+            var user = new BaseRepository<User>(sqlConnection).Get(id);
 
             Console.WriteLine($"Usuário {user.Name} foi criado");
 
         }
         public static void UpdateUser(User usuario, SqlConnection sqlConnection)
         {
-            var hasUpdate = new UserRepository(sqlConnection).Update(usuario);
+            var hasUpdate = new BaseRepository<User>(sqlConnection).Update(usuario);
 
-            var user = new UserRepository(sqlConnection).Get(usuario.Id);
+            var user = new BaseRepository<User>(sqlConnection).Get(usuario.Id);
 
             Console.WriteLine($"Usuário {user.Name} foi atualizado");
 
@@ -58,9 +63,9 @@ namespace baltaio_DapperEndityframework
         public static void DeleteUser(User usuario, SqlConnection sqlConnection)
         {
 
-            var user = new UserRepository(sqlConnection).Get(usuario.Id);
+            var user = new BaseRepository<User>(sqlConnection).Get(usuario.Id);
 
-            var id = new UserRepository(sqlConnection).Delete(user);
+            var id = new BaseRepository<User>(sqlConnection).Delete(user);
 
             Console.WriteLine($"Usuário {user.Name} excluído");
 
@@ -76,6 +81,19 @@ namespace baltaio_DapperEndityframework
             foreach (var role in roles)
             {
                 Console.WriteLine(role.Name);
+            }
+
+        }
+        #endregion
+
+        #region Tags
+        public static void ReadTags(SqlConnection sqlConnection)
+        {
+            var tags = new BaseRepository<Tag>(sqlConnection).GetAll();
+
+            foreach (var tag in tags)
+            {
+                Console.WriteLine(tag.Name);
             }
 
         }
