@@ -1,4 +1,5 @@
 ﻿using baltaio_DapperEndityframework.Models;
+using baltaio_DapperEndityframework.Repositories;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
@@ -12,88 +13,72 @@ namespace baltaio_DapperEndityframework
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            //ReadUsers();
-            //ReadUser();
-            //CreateUser(new User { 
-            //    Name = "Felipe Silva",
-            //    Email = "Felip.silva@gmail.com",
-            //    PasswordHash = "asdf",
-            //    Bio = "Professor",
-            //    Image = "Textando",
-            //    Slug = "Felipe-Silva"
-            //}); 
-            //UpdateUser(new User
-            //{
-            //    Id = 3,
-            //    Name = "Lucas Silva",
-            //    Email = "Felip.silva@gmail.com",
-            //    PasswordHash = "asdf",
-            //    Bio = "Professor",
-            //    Image = "Textando",
-            //    Slug = "Felipe-Silva"
-            //});
-            DeleteUser(new User { Id = 3 });
+
+            SqlConnection sqlConnection = new SqlConnection(_connection);
+            sqlConnection.Open();
+            ReadUsers(sqlConnection);
+            ReadRole(sqlConnection);
+            sqlConnection.Close();
 
         }
 
-        public static void ReadUsers()
+        #region User
+        public static void ReadUsers(SqlConnection sqlConnection)
         {
-            using (var connection = new SqlConnection(_connection)) {
-                var users = connection.GetAll<User>();
+            var users = new BaseRepository<User>(sqlConnection).GetAll();
 
-                foreach (var user in users) {
-                    Console.WriteLine(user.Name);
-                }
-
-            }        
-        }
-        public static void ReadUser()
-        {
-            using (var connection = new SqlConnection(_connection))
-            {
-                var user = connection.Get<User>(1);
-
+            foreach (var user in users) {
                 Console.WriteLine(user.Name);
-
             }
+  
         }
-
-
-        public static void CreateUser(User usuario)
+        public static void ReadUser(int id,SqlConnection sqlConnection)
         {
-            using (var connection = new SqlConnection(_connection))
-            {
-                var id = connection.Insert<User>(usuario);
+            var user = new UserRepository(sqlConnection).Get(id);
+            Console.WriteLine(user.Name);
 
-                var user = connection.Get<User>(id);
-
-                Console.WriteLine(user.Name);
-
-            }
         }
-        public static void UpdateUser(User usuario)
+        public static void CreateUser(User usuario, SqlConnection sqlConnection)
         {
-            using (var connection = new SqlConnection(_connection))
-            {
-                var id = connection.Update<User>(usuario);
+            var id = new UserRepository(sqlConnection).Insert(usuario);
+            var user = new UserRepository(sqlConnection).Get(id);
 
-                var user = connection.Get<User>(usuario.Id);
+            Console.WriteLine($"Usuário {user.Name} foi criado");
 
-                Console.WriteLine(user.Name);
-
-            }
         }
-        public static void DeleteUser(User usuario)
+        public static void UpdateUser(User usuario, SqlConnection sqlConnection)
         {
-            using (var connection = new SqlConnection(_connection))
-            {
-                var user = connection.Get<User>(usuario.Id);
+            var hasUpdate = new UserRepository(sqlConnection).Update(usuario);
 
-                var id = connection.Delete<User>(user);
+            var user = new UserRepository(sqlConnection).Get(usuario.Id);
 
-                Console.WriteLine($"Usuário {user.Name} excluído");
+            Console.WriteLine($"Usuário {user.Name} foi atualizado");
 
-            }
         }
+        public static void DeleteUser(User usuario, SqlConnection sqlConnection)
+        {
+
+            var user = new UserRepository(sqlConnection).Get(usuario.Id);
+
+            var id = new UserRepository(sqlConnection).Delete(user);
+
+            Console.WriteLine($"Usuário {user.Name} excluído");
+
+        }
+
+        #endregion
+
+        #region Role 
+        public static void ReadRole(SqlConnection sqlConnection)
+        {
+            var roles = new BaseRepository<Role>(sqlConnection).GetAll();
+
+            foreach (var role in roles)
+            {
+                Console.WriteLine(role.Name);
+            }
+
+        }
+        #endregion
     }
 }
